@@ -1,64 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import ProfileInfo from '../components/ProfilePage/ProfileInfo';
+import axios from 'axios';
+import useAxiosPublic from '../hooks/useAxiosPublic';
+import BlogCard from '../components/shared/BlogCard';
+import NavBar from '../components/shared/NavBar';
 
 const Profile = () => {
+    const { id } = useParams()
+
+    const [userData, setUserData] = useState({})
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const res = await axios.get(`http://localhost:3000/profile/${id}`)
+            if (res.status === 200) {
+                console.log(res.data);
+                setUserData(res.data)
+            }
+        }
+        fetchProfile()
+    }, [id])
     return (
         <div>
-            <header>
-                <nav className="container">
-                    {/* Logo */}
-                    <div>
-                        <a href="./index.html">
-                            <img className="w-32" src="./assets/logo.svg" alt="lws" />
-                        </a>
+            <NavBar />
+            <main className="mx-auto max-w-[1020px] py-8">
+                <div className="container">
+                    <ProfileInfo user={userData} />
+                    <h4 className="mt-6 text-xl lg:mt-8 lg:text-2xl">Your Blogs</h4>
+                    <div className="my-6 space-y-4">
+                        {
+                            userData?.blogs?.map(blog => <BlogCard blog={blog} key={blog.id} />)
+                        }
                     </div>
-                    {/* Actions - Login, Write, Home, Search */}
-                    {/* Notes for Developers */}
-                    {/* For Logged in User - Write, Profile, Logout Menu */}
-                    {/* For Not Logged in User - Login Menu */}
-                    <div>
-                        <ul className="flex items-center space-x-5">
-                            <li>
-                                <a
-                                    href="./createBlog.html"
-                                    className="bg-indigo-600 text-white px-6 py-2 md:py-3 rounded-md hover:bg-indigo-700 transition-all duration-200"
-                                >
-                                    Write
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="./search.html"
-                                    className="flex items-center gap-2 cursor-pointer"
-                                >
-                                    <img src="./assets/icons/search.svg" alt="Search" />
-                                    <span>Search</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="./login.html"
-                                    className="text-white/50 hover:text-white transition-all duration-200"
-                                >
-                                    {" "}
-                                    Login{" "}
-                                </a>
-                            </li>
-                            <li className="flex items-center">
-                                {/* Circular Div with background color */}
-                                <div className="avater-img bg-orange-600 text-white">
-                                    <span className="">S</span>
-                                    {/* User's first name initial */}
-                                </div>
-                                {/* Logged-in user's name */}
-                                <span className="text-white ml-2">Saad Hasan</span>
-                                {/* Profile Image */}
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </header>
 
-            Profile
+                </div>
+            </main>
+
         </div>
     );
 };

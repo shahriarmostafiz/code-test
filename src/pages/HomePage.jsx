@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import useAxiosPublic from '../hooks/useAxiosPublic';
 import BlogCard from '../components/shared/BlogCard';
 import axios from 'axios';
+import Popular from '../components/HomePage/Popular';
+import useAuth from '../hooks/useAuth';
+import UserFavourites from '../components/HomePage/UserFavourites';
 
 const HomePage = () => {
     const { axiosPublic } = useAxiosPublic()
@@ -11,6 +14,9 @@ const HomePage = () => {
     const loaderRef = useRef(null)
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(false)
+    const { auth } = useAuth()
+
+    console.log(auth);
 
 
     useEffect(() => {
@@ -62,6 +68,13 @@ const HomePage = () => {
                     <div className="space-y-3 md:col-span-5">
                         {
                             data?.map(blog => <BlogCard key={blog?.id} blog={blog} idx={blog.id} />)
+                        }
+                    </div>
+                    {/* sidebar */}
+                    <div className="md:col-span-2 h-full w-full space-y-5">
+                        <Popular />
+                        {
+                            auth?.user && <UserFavourites />
                         }
                     </div>
                 </div>
