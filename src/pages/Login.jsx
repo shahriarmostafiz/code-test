@@ -20,7 +20,11 @@ const Login = () => {
                 if (token) {
                     const authToken = token?.accessToken
                     const refreshToken = token?.refreshToken
+
                     console.log(`Login time auth token ${authToken}`);
+                    localStorage.setItem("authToken", authToken)
+                    localStorage.setItem("refreshToken", refreshToken)
+                    localStorage.setItem("user", JSON.stringify(user))
                     setAuth({ user, authToken, refreshToken })
                     navigate("/")
                 }

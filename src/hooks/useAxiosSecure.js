@@ -1,24 +1,30 @@
-import axios from "axios";
+// import axios from "axios";
 import { useEffect } from "react";
 import useAuth from "./useAuth";
+import { getRefreshToken, getToken } from "../utilities/authDetails";
+import axios from "axios";
 
 const useAxiosSecure = () => {
+  console.log("axiosSecure was accessed");
   const { auth, setAuth } = useAuth();
+  const myToken = getToken();
+  console.log(myToken);
   const api = axios.create({
-    baseURL: `${import.meta.env.VITE_SERVER_BASE_URL}`,
+    withCredentials: true,
   });
 
   useEffect(() => {
     // add a request interceptor
     const requestIntercept = api.interceptors.request.use(
       (config) => {
-        const authToken = auth?.authToken;
-        if (authToken) {
-          config.headers.Authorization = `Bearer ${authToken}`;
-        }
+        const authToken = myToken;
+
+        console.log("sending token", authToken);
+        config.headers.Authorization = `Bearer ${authToken}`;
         return config;
       },
       (error) => {
+        console.log(error);
         return Promise.reject(error);
       }
     );
@@ -31,22 +37,29 @@ const useAxiosSecure = () => {
         // console.log(error)
         const originalRequest = error.config;
 
-        if (error.response.status === 401 && !originalRequest._retry) {
+        if (error.response.status === 403 && !originalRequest._retry) {
           originalRequest._retry = true;
 
           try {
-            const refreshToken = auth?.refreshToken;
+            const cRefreshToken = auth?.refreshToken || getRefreshToken();
             const response = await axios.post(
-              `${import.meta.env.VITE_SERVER_BASE_URL}/auth/refresh-token`,
-              { refreshToken }
+              `http://localhost:3000/auth/refresh-token`,
+              { refreshToken: cRefreshToken }
             );
-            const { token } = response.data;
+            const token = response.data;
             console.log("New Token:", token);
-            setAuth({ ...auth, authToken: token });
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            setAuth({
+              ...auth,
+              authToken: token.accessToken,
+              refreshToken: token.refreshToken,
+            });
+            localStorage.setItem("authToken", token.accessToken);
+            localStorage.setItem("refreshToken", token.refreshToken);
+            originalRequest.headers.Authorization = `Bearer ${token.accessToken}`;
             return axios(originalRequest);
           } catch (error) {
-            throw error;
+            // throw error;
+            console.log(error);
           }
         }
         return Promise.reject(error);
@@ -56,7 +69,7 @@ const useAxiosSecure = () => {
       api.interceptors.request.eject(requestIntercept);
       api.interceptors.response.eject(responseIntercept);
     };
-  }, [auth?.authToken]);
+  }, []);
   return { api };
 };
 export default useAxiosSecure;

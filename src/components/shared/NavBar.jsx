@@ -4,12 +4,19 @@ import { Link } from "react-router-dom"
 import useAuth from "../../hooks/useAuth";
 import UserMenu from "./UserMenu";
 import GuestMenu from "./GuestMenu";
+import { getUser } from "../../utilities/authDetails";
 const NavBar = () => {
     const { auth, setAuth } = useAuth()
+    const user = auth?.user || getUser() || null
+
 
     const logout = () => {
         setAuth({})
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
     }
+
     return (
         <header>
 
@@ -28,7 +35,7 @@ const NavBar = () => {
                 <div>
                     <ul className="flex items-center space-x-5">
                         {
-                            auth?.user ? (<UserMenu onLogOut={logout} user={auth?.user} />) : (<GuestMenu />)
+                            user ? (<UserMenu onLogOut={logout} user={user} />) : (<GuestMenu />)
                         }
                     </ul>
                 </div>

@@ -6,6 +6,7 @@ import axios from 'axios';
 import Popular from '../components/HomePage/Popular';
 import useAuth from '../hooks/useAuth';
 import UserFavourites from '../components/HomePage/UserFavourites';
+import { getUser } from '../utilities/authDetails';
 
 const HomePage = () => {
     const { axiosPublic } = useAxiosPublic()
@@ -15,8 +16,9 @@ const HomePage = () => {
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(false)
     const { auth } = useAuth()
+    const user = auth?.user || getUser()
 
-    console.log(auth);
+    // console.log(auth);
 
 
     useEffect(() => {
@@ -74,7 +76,7 @@ const HomePage = () => {
                     <div className="md:col-span-2 h-full w-full space-y-5">
                         <Popular />
                         {
-                            auth?.user && <UserFavourites />
+                            user && <UserFavourites />
                         }
                     </div>
                 </div>
